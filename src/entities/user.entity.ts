@@ -3,7 +3,9 @@ import {
   Column,
   PrimaryGeneratedColumn,
   CreateDateColumn,
+  OneToMany,
 } from 'typeorm';
+import { Post } from './post.entity';
 
 @Entity()
 export class User {
@@ -25,6 +27,9 @@ export class User {
   @Column({ nullable: true, default: null })
   refresh_token: string;
 
+  @Column({ nullable: true, default: null })
+  avatar: string;
+
   @Column({ default: 1 })
   status: number;
 
@@ -33,4 +38,7 @@ export class User {
 
   @CreateDateColumn()
   updated_at: Date;
+
+  @OneToMany(() => Post, (post) => post.user)
+  posts: Post[]
 }
