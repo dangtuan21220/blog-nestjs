@@ -5,6 +5,7 @@ import {
   Delete,
   Get,
   Param,
+  ParseArrayPipe,
   Post,
   Put,
   Query,
@@ -19,7 +20,13 @@ import { AuthGuard } from 'src/auth/auth.guard';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { FilterUserDto } from './dto/filter-user.dto';
-import { ApiBearerAuth, ApiQuery, ApiTags } from '@nestjs/swagger';
+import {
+  ApiBearerAuth,
+  ApiBody,
+  ApiConsumes,
+  ApiQuery,
+  ApiTags,
+} from '@nestjs/swagger';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { storageConfig } from 'helpers/config';
 import { extname } from 'path';
@@ -59,6 +66,16 @@ export class UserController {
   }
 
   @UseGuards(AuthGuard)
+  @Delete('multiple')
+  multipleDelete(
+    @Query('ids', new ParseArrayPipe({ items: String, separator: ',' }))
+    ids: string[],
+  ) {
+    console.log('delete multi=> ', ids);
+    return this.userService.multipleDelete(ids);
+  }
+
+  @UseGuards(AuthGuard)
   @Delete(':id')
   delete(@Param('id') id: string) {
     return this.userService.delete(Number(id));
@@ -66,6 +83,18 @@ export class UserController {
 
   @UseGuards(AuthGuard)
   @Post('upload-avatar')
+  @ApiConsumes('multipart/form-data')
+  @ApiBody({
+    schema: {
+      type: 'object',
+      properties: {
+        avatar: {
+          type: 'string',
+          format: 'binary',
+        },
+      },
+    },
+  })
   @UseInterceptors(
     FileInterceptor('avatar', {
       storage: storageConfig('avatar'),
@@ -89,9 +118,9 @@ export class UserController {
     }),
   )
   uploadAvatar(@Req() req: any, @UploadedFile() file: Express.Multer.File) {
-    // console.log('upload avatar');
+    console.log('upload avatar');
     // console.log('user data', req.user_data);
-    // console.log(file);
+    console.log(file);
 
     if (req.fileValidationError) {
       throw new BadRequestException(req.fileValidationError);
