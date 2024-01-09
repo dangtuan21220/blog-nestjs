@@ -38,9 +38,9 @@ export class UserController {
   constructor(private userService: UserService) {}
 
   @UseGuards(AuthGuard)
-  @ApiQuery({ name: 'page' })
-  @ApiQuery({ name: 'items_per_page' })
-  @ApiQuery({ name: 'search' })
+  @ApiQuery({ name: 'page', required: false })
+  @ApiQuery({ name: 'items_per_page', required: false })
+  @ApiQuery({ name: 'search', required: false, type: String })
   @Get()
   findAll(@Query() query: FilterUserDto): Promise<User[]> {
     console.log(query);
